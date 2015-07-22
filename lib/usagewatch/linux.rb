@@ -126,7 +126,7 @@ module Usagewatch
 
     @memstat = @result.split("\n").collect{|x| x.strip}
     @memtotal = @memstat[0].gsub(/[^0-9]/, "")
-    @memactive = @memstat[5].gsub(/[^0-9]/, "")
+    @memactive = @memstat[6].gsub(/[^0-9]/, "")
     @memactivecalc = (@memactive.to_f * 100) / @memtotal.to_f
     @memusagepercentage = @memactivecalc.round
   end
@@ -146,7 +146,7 @@ module Usagewatch
   end
 
   def self.uw_memactive
-    get_memstat[5].gsub(/[^0-9]/, "")
+    get_memstat[6].gsub(/[^0-9]/, "")
   end
 
   # return hash of top ten proccesses by mem consumption
