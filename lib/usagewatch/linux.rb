@@ -1,7 +1,7 @@
 # License: (MIT), Copyright (C) 2013 usagewatch Author Phil Chen, contributor Ruben Espinosa
 
 module Usagewatch
-  def get_df_column_index_sum index
+  def self.get_df_column_index_sum index
     @df = `df`
     @parts = @df.split(" ").map { |s| s.to_i }
     @sum = 0
