@@ -1,16 +1,30 @@
 # License: (MIT), Copyright (C) 2013 usagewatch Author Phil Chen, contributor Ruben Espinosa
 
 module Usagewatch
-  # Show the amount of total disk used in Gigabytes
-  def self.uw_diskused
+  def get_df_column_index_sum index
     @df = `df`
     @parts = @df.split(" ").map { |s| s.to_i }
     @sum = 0
-    for i in (9..@parts.size - 1).step(6) do
+    for i in (index..@parts.size - 1).step(6) do
       @sum += @parts[i]
     end
     @round = @sum.round(2)
     @totaldiskused = ((@round/1024)/1024).round(2)
+  end
+
+  #Show the amount of total disk in Gigabytes
+  def self.uw_totaldisk
+    get_df_column_index_sum 8
+  end
+
+  # Show the amount of total disk used in Gigabytes
+  def self.uw_diskused
+    get_df_column_index_sum 9
+  end
+
+  #Show the total amount of disk available in Gigabytes
+  def self.uw_diskavailable
+    get_df_column_index_sum 10
   end
 
   # Show the percentage of disk used.
@@ -21,21 +35,21 @@ module Usagewatch
 
   # Show the percentage of CPU used
   def self.uw_cpuused
-    @proc0 = File.readlines('/proc/stat').grep(/^cpu /).first.split(" ")
+    first_measure = File.readlines('/proc/stat').grep(/^cpu /).first.split(" ")
     sleep 1
-    @proc1 = File.readlines('/proc/stat').grep(/^cpu /).first.split(" ")
+    second_measure = File.readlines('/proc/stat').grep(/^cpu /).first.split(" ")
 
-    @proc0usagesum = @proc0[1].to_i + @proc0[2].to_i + @proc0[3].to_i
-    @proc1usagesum = @proc1[1].to_i + @proc1[2].to_i + @proc1[3].to_i
+    @proc0usagesum = first_measure[1].to_i + first_measure[2].to_i + first_measure[3].to_i
+    @proc1usagesum = second_measure[1].to_i + second_measure[2].to_i + second_measure[3].to_i
     @procusage = @proc1usagesum - @proc0usagesum
 
     @proc0total = 0
     for i in (1..4) do
-      @proc0total += @proc0[i].to_i
+      @proc0total += first_measure[i].to_i
     end
     @proc1total = 0
     for i in (1..4) do
-      @proc1total += @proc1[i].to_i
+      @proc1total += second_measure[i].to_i
     end
     @proctotal = (@proc1total - @proc0total)
 
@@ -115,6 +129,24 @@ module Usagewatch
     @memactive = @memstat[5].gsub(/[^0-9]/, "")
     @memactivecalc = (@memactive.to_f * 100) / @memtotal.to_f
     @memusagepercentage = @memactivecalc.round
+  end
+
+  def self.get_memstat
+    if File.exists?("/proc/meminfo")
+      File.open("/proc/meminfo", "r") do |file|
+        @result = file.read
+      end
+    end
+
+    @memstat = @result.split("\n").collect{|x| x.strip}
+  end
+
+  def self.uw_memtotal
+    get_memstat[0].gsub(/[^0-9]/, "")
+  end
+
+  def self.uw_memactive
+    get_memstat[5].gsub(/[^0-9]/, "")
   end
 
   # return hash of top ten proccesses by mem consumption
