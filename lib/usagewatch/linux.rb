@@ -1,30 +1,27 @@
 # License: (MIT), Copyright (C) 2013 usagewatch Author Phil Chen, contributor Ruben Espinosa
 
 module Usagewatch
-  def self.get_df_column_index_sum index
-    @df = `df`
-    @parts = @df.split(" ").map { |s| s.to_i }
-    @sum = 0
-    for i in (index..@parts.size - 1).step(6) do
-      @sum += @parts[i]
-    end
-    @round = @sum.round(2)
-    @totaldiskused = ((@round/1024)/1024).round(2)
+  def self.get_df_column_rootfs index
+    df = `df /`
+    parts = df.split(" ").map { |s| s.to_i }
+    val = parts[index]
+    round = val.round(2)
+    ((round/1024)/1024).round(2)
   end
 
   #Show the amount of total disk in Gigabytes
   def self.uw_totaldisk
-    get_df_column_index_sum 8
+    get_df_column_rootfs 8
   end
 
   # Show the amount of total disk used in Gigabytes
   def self.uw_diskused
-    get_df_column_index_sum 9
+    get_df_column_rootfs 9
   end
 
   #Show the total amount of disk available in Gigabytes
   def self.uw_diskavailable
-    get_df_column_index_sum 10
+    get_df_column_rootfs 10
   end
 
   # Show the percentage of disk used.
